@@ -76,6 +76,7 @@ export interface PullRequestsTable {
 	title: string;
 	author_github_user_id: string | null;
 	state: string;
+	draft: boolean;
 	html_url: string;
 	created_at: Timestamp;
 	updated_at: Timestamp;
