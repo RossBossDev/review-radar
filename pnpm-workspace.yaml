@@ -1,6 +1,8 @@
 packages:
   - "apps/*"
 allowBuilds:
-  esbuild: set this to true or false
-  lefthook: set this to true or false
-  unrs-resolver: set this to true or false
+  esbuild: true
+  lefthook: true
+onlyBuiltDependencies:
+  - esbuild
+  - lefthook

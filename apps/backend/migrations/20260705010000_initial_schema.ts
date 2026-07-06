@@ -132,6 +132,7 @@ export async function up(db: Kysely<unknown>): Promise<void> {
 			col.references("github_users.id").onDelete("set null"),
 		)
 		.addColumn("state", "text", (col) => col.notNull())
+		.addColumn("draft", "boolean", (col) => col.notNull().defaultTo(false))
 		.addColumn("html_url", "text", (col) => col.notNull())
 		.addColumn("created_at", "timestamptz", (col) =>
 			col.notNull().defaultTo(db.fn("now")),
