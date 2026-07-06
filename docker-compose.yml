@@ -1,0 +1,42 @@
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: opentoast
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d opentoast"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    env_file:
+      - apps/backend/.env.example
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/opentoast
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  worker:
+    build: .
+    command: ["node", "dist/src/worker.js"]
+    env_file:
+      - apps/backend/.env.example
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/opentoast
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres-data:

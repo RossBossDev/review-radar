@@ -1,0 +1,26 @@
+# syntax=docker/dockerfile:1
+
+FROM node:24-alpine AS base
+ENV PNPM_HOME=/pnpm
+ENV PATH=$PNPM_HOME:$PATH
+RUN corepack enable
+WORKDIR /app
+
+FROM base AS deps
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+COPY apps/backend/package.json apps/backend/package.json
+RUN pnpm install --frozen-lockfile --ignore-scripts
+
+FROM deps AS build
+COPY . .
+RUN pnpm --filter backend build
+
+FROM node:24-alpine AS runtime
+ENV NODE_ENV=production
+WORKDIR /app/apps/backend
+COPY --from=build /app/node_modules /app/node_modules
+COPY --from=build /app/apps/backend/node_modules ./node_modules
+COPY --from=build /app/apps/backend/dist ./dist
+COPY --from=build /app/apps/backend/package.json ./package.json
+EXPOSE 3000
+CMD ["node", "dist/src/main.js"]

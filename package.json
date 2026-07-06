@@ -1,0 +1,25 @@
+{
+	"name": "opentoast",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"packageManager": "pnpm@11.10.0",
+	"engines": {
+		"node": ">=24.18.0",
+		"pnpm": ">=11.10.0"
+	},
+	"scripts": {
+		"dev": "pnpm --filter backend start:dev",
+		"build": "pnpm --filter backend build",
+		"test": "pnpm --filter backend test",
+		"check": "biome check .",
+		"check:fix": "biome check --write .",
+		"db:migrate": "pnpm --filter backend db:migrate",
+		"db:migrate:list": "pnpm --filter backend db:migrate:list",
+		"db:types": "pnpm --filter backend db:types"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.5.2",
+		"lefthook": "^2.1.9"
+	}
+}
