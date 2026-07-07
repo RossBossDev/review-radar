@@ -21,6 +21,11 @@ WORKDIR /app/apps/backend
 COPY --from=build /app/node_modules /app/node_modules
 COPY --from=build /app/apps/backend/node_modules ./node_modules
 COPY --from=build /app/apps/backend/dist ./dist
+COPY --from=build /app/apps/backend/migrations ./migrations
+COPY --from=build /app/apps/backend/kysely.config.ts ./kysely.config.ts
 COPY --from=build /app/apps/backend/package.json ./package.json
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 EXPOSE 3000
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["node", "dist/src/main.js"]

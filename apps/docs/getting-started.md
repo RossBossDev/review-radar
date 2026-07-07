@@ -1,40 +1,124 @@
 # Getting started
 
-This page describes the intended product onboarding flow for Review Radar. The hosted product flow is still coming soon, so the steps below are placeholders rather than a promise that public signup is available today.
+This page tracks the hands-on onboarding flow for connecting a running Review Radar instance to a Slack workspace and GitHub organization.
 
-::: warning Coming soon
-Review Radar does not yet have complete public onboarding documentation. If you want to run the project locally, see the repository README instead.
+::: warning Early setup
+Review Radar does not yet have hosted signup. The steps below assume you are running the backend yourself, either locally behind a public tunnel or on a deployed HTTPS URL.
 :::
 
-## 1. Create or join a Review Radar workspace
+## Setup checklist
 
-TODO: Add the product flow for creating a workspace, accepting an invite, and choosing the workspace where pull request attention should be tracked.
+1. Run the backend with a public HTTPS base URL.
+2. Create and install a GitHub App for the target organization.
+3. Create and install a Slack App for the target workspace.
+4. Link Slack users to GitHub logins with `/review-radar link <github-login>`.
+5. Trigger pull request activity and verify attention items appear in Slack.
 
-A workspace will be the home for your team's GitHub and Slack connections, repository choices, and delivery preferences.
+## 1. Run the backend
+
+Review Radar needs a URL that GitHub and Slack can call. For local setup, start the API on port `3000` and expose it with a tunnel such as ngrok or Cloudflare Tunnel.
+
+Use these callback URLs, replacing `<base-url>` with your public HTTPS URL:
+
+| Integration area | URL |
+| --- | --- |
+| GitHub webhook | `<base-url>/webhooks/github` |
+| Slack slash command | `<base-url>/slack/commands` |
+| Slack events | `<base-url>/slack/events` |
+| Slack interactivity | `<base-url>/slack/interactions` |
+| Readiness check | `<base-url>/health/ready` |
+
+Set `APP_BASE_URL=<base-url>` in `apps/backend/.env`.
+
+Local bootstrap commands:
+
+```bash
+cp apps/backend/.env.example apps/backend/.env
+corepack enable
+pnpm install
+POSTGRES_PORT=5433 docker compose up -d postgres # use 5432 if it is free
+pnpm db:migrate
+pnpm dev
+```
+
+If you use a non-default Postgres port, update `DATABASE_URL` in `apps/backend/.env` to match it, for example `postgres://postgres:postgres@localhost:5433/review-radar`.
 
 ## 2. Connect GitHub
 
-TODO: Add the GitHub connection flow.
+Create a GitHub App in the organization account that owns the repositories Review Radar should watch.
 
-Review Radar will use a GitHub integration to understand pull requests, review requests, review activity, and other signals that create or resolve attention items.
+Minimum current configuration:
+
+- Webhook URL: `<base-url>/webhooks/github`
+- Webhook secret: a strong random value saved as `GITHUB_WEBHOOK_SECRET`
+- Repository permissions:
+  - Pull requests: read
+  - Issues: read
+  - Checks: read
+  - Metadata: read (required by GitHub)
+- Subscribe to events:
+  - Pull request
+  - Pull request review
+  - Pull request review comment
+  - Issue comment
+  - Check run
+  - Check suite
+
+After creating the app, save these values in `apps/backend/.env`:
+
+- `GITHUB_APP_ID`
+- `GITHUB_PRIVATE_KEY` from the generated private key file
+- `GITHUB_WEBHOOK_SECRET`
+
+Install the app on the organization repositories you want Review Radar to monitor.
 
 ## 3. Connect Slack
 
-TODO: Add the Slack connection flow.
+Create a Slack App for the workspace where Review Radar should send personal inbox responses and reminders.
 
-Slack delivery will let Review Radar send reminders and digests to the right place without asking you to monitor yet another inbox.
+Minimum current configuration:
 
-## 4. Choose repositories
+- Slash command: `/review-radar`
+  - Request URL: `<base-url>/slack/commands`
+- Event subscriptions:
+  - Request URL: `<base-url>/slack/events`
+  - Bot event: `app_home_opened`
+- Interactivity:
+  - Request URL: `<base-url>/slack/interactions`
+- Bot token scopes:
+  - `chat:write`
+  - `commands`
 
-TODO: Add repository selection and permission guidance.
+After installing the Slack App, save these values in `apps/backend/.env`:
 
-Teams should be able to choose the repositories that Review Radar watches, keeping the personal inbox focused on relevant pull request activity.
+- `SLACK_SIGNING_SECRET`
+- `SLACK_BOT_TOKEN`
 
-## 5. Receive your first personal inbox digest or reminder
+## 4. Link users
 
-TODO: Add screenshots and expected first-run behavior once the product flow exists.
+Each Slack user needs to link their Slack account to their GitHub login before personal inbox commands or direct-message delivery can target them:
 
-The intended first success moment is simple: Review Radar identifies pull request attention items for you and delivers a concise reminder or digest that helps you decide what to review, respond to, or follow up on next.
+```text
+/review-radar link <github-login>
+```
+
+Useful commands:
+
+```text
+/review-radar inbox
+/review-radar unlink
+/review-radar help
+```
+
+## 5. Verify the first signal
+
+Open or update a pull request in an installed repository, then create an event Review Radar understands, such as requesting a review, mentioning a GitHub user in a PR body or comment, submitting a review, or completing checks.
+
+Then verify:
+
+1. GitHub reports successful webhook deliveries to `/webhooks/github`.
+2. The backend logs show the delivery was accepted.
+3. The linked Slack user can run `/review-radar inbox` and see active attention items.
 
 ## Need developer setup?
 
