@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Review Radar dark app icon</title>
+  <desc id="desc">Review Radar mark on a rounded navy app tile.</desc>
+  <defs>
+    <linearGradient id="sweep-fade" x1="246" y1="206" x2="382" y2="180" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#32d46b" stop-opacity=".08"/>
+      <stop offset=".58" stop-color="#32d46b" stop-opacity=".34"/>
+      <stop offset="1" stop-color="#32d46b" stop-opacity=".66"/>
+    </linearGradient>
+    <style>
+      .ring { fill: none; stroke: #32d46b; stroke-linecap: round; }
+      .graph-edge { fill: none; stroke: #ffffff; stroke-width: 12; stroke-linecap: round; stroke-linejoin: round; }
+      .node { fill: #06131d; stroke: #ffffff; stroke-width: 9; }
+      .accent-node { fill: #32d46b; stroke: #ffffff; stroke-width: 9; }
+    </style>
+  </defs>
+
+  <rect width="512" height="512" rx="106" fill="#020b12"/>
+  <circle cx="256" cy="256" r="220" fill="#06131d" opacity=".72"/>
+
+  <g id="radar">
+    <path id="sweep" d="M256 256 L316 82 A184 184 0 0 1 438 224 Z" fill="url(#sweep-fade)"/>
+    <circle class="ring" cx="256" cy="256" r="184" stroke-width="12"/>
+    <circle class="ring" cx="256" cy="256" r="128" stroke-width="8" opacity=".52"/>
+    <circle class="ring" cx="256" cy="256" r="74" stroke-width="8" opacity=".58"/>
+    <circle class="ring" cx="256" cy="256" r="42" stroke-width="6" opacity=".44"/>
+  </g>
+
+  <g id="git-review-graph">
+    <path class="graph-edge" d="M232 154V372M232 258l96 54v54"/>
+    <circle class="node" cx="232" cy="154" r="17"/>
+    <circle class="accent-node" cx="232" cy="258" r="21"/>
+    <circle class="node" cx="232" cy="372" r="17"/>
+    <circle class="node" cx="328" cy="312" r="17"/>
+    <circle class="accent-node" cx="328" cy="366" r="17"/>
+  </g>
+</svg>
