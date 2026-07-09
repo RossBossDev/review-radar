@@ -34,18 +34,33 @@ describe("DigestBuilder", () => {
 		]);
 
 		expect(message?.text).toBe(
-			[
-				"Good morning 👋",
-				"",
-				"Needs review",
-				"• <https://github.example/acme/api/pull/281|api #281>",
-				"Waiting on response",
-				"• <https://github.example/acme/frontend/pull/412|frontend #412>",
-				"Failed CI",
-				"• <https://github.example/acme/payments/pull/87|payments #87>",
-				"Waiting on others",
-				"• <https://github.example/acme/search/pull/55|search #55>",
-			].join("\n"),
+			"Good morning 👋 You have 4 PRs needing attention.",
+		);
+
+		const blocks = JSON.stringify(message?.blocks);
+		expect(blocks.indexOf(":eyes: Needs review")).toBeLessThan(
+			blocks.indexOf(":hourglass_flowing_sand: Waiting on your response"),
+		);
+		expect(
+			blocks.indexOf(":hourglass_flowing_sand: Waiting on your response"),
+		).toBeLessThan(blocks.indexOf(":x: Checks failed"));
+		expect(blocks).toContain(
+			"<https://github.example/acme/api/pull/281|api #281> — Example PR",
+		);
+		expect(blocks).toContain('"type":"divider"');
+	});
+
+	it("uses singular summary copy for one PR", () => {
+		const message = builder.build([
+			item({
+				category: AttentionCategory.NeedsReview,
+				repo: "acme/api",
+				number: 281,
+			}),
+		]);
+
+		expect(message?.text).toBe(
+			"Good morning 👋 You have 1 PR needing attention.",
 		);
 	});
 });

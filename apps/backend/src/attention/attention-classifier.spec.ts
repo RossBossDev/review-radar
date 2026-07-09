@@ -4,6 +4,7 @@ import { AttentionCategory, AttentionStatus } from "./attention.types";
 import { classifyGithubFact } from "./attention-classifier";
 
 const occurredAt = new Date("2026-07-05T12:00:00Z");
+const nonStaleConfig = { staleReviewRequestAfterMs: Number.MAX_SAFE_INTEGER };
 
 function fact(overrides: Partial<GithubNormalizedFact>): GithubNormalizedFact {
 	return {
@@ -28,6 +29,7 @@ describe("classifyGithubFact", () => {
 		const transitions = classifyGithubFact(
 			fact({ type: "review_requested", actorLogin: "Reviewer" }),
 			context,
+			nonStaleConfig,
 		);
 
 		expect(transitions).toEqual([

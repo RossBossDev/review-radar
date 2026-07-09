@@ -24,14 +24,14 @@ describe("SlackDebugExamplesService", () => {
 			1,
 			expect.objectContaining({
 				channel: "U123",
-				text: "Review requested — acme/api PR #281",
+				text: ":eyes: You were requested for review — Add webhook retry handling",
 			}),
 		);
 		expect(slack.postMessage).toHaveBeenNthCalledWith(
 			2,
 			expect.objectContaining({
 				channel: "U123",
-				text: "Waiting on your response — acme/frontend PR #412",
+				text: ":hourglass_flowing_sand: Waiting on your response — Refine Slack digest formatting",
 			}),
 		);
 		expect(slack.postMessage).toHaveBeenNthCalledWith(

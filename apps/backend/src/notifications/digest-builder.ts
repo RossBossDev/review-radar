@@ -32,53 +32,75 @@ export class DigestBuilder {
 			return undefined;
 		}
 
-		const sections = CATEGORY_ORDER.flatMap((category) => {
+		const groupedBlocks = CATEGORY_ORDER.flatMap((category) => {
 			const categoryItems = items.filter((item) => item.category === category);
 			if (categoryItems.length === 0) {
 				return [];
 			}
+
 			return [
-				this.headingFor(category),
-				...categoryItems.map((item) => this.itemLine(item)),
+				{ type: "divider" },
+				{
+					type: "section",
+					text: {
+						type: "mrkdwn",
+						text: `*${this.headingFor(category)}*`,
+					},
+				},
+				{
+					type: "section",
+					text: {
+						type: "mrkdwn",
+						text: categoryItems.map((item) => this.itemLine(item)).join("\n"),
+					},
+				},
 			];
 		});
 
-		const text = ["Good morning 👋", "", ...sections].join("\n");
+		const text = `Good morning 👋 You have ${items.length} ${this.pluralize("PR", items.length)} needing attention.`;
 
 		return {
 			text,
 			blocks: [
 				{
 					type: "section",
-					text: { type: "mrkdwn", text },
+					text: {
+						type: "mrkdwn",
+						text: `*Good morning 👋*\nYou have *${items.length}* ${this.pluralize("PR", items.length)} needing attention.`,
+					},
 				},
+				...groupedBlocks,
 			],
 		};
 	}
 
 	private itemLine(item: DigestMessageItem): string {
 		const repositoryName = item.repositoryFullName.split("/").at(-1);
-		return `• <${item.pullRequestUrl}|${repositoryName} #${item.pullRequestNumber}>`;
+		return `• <${item.pullRequestUrl}|${repositoryName} #${item.pullRequestNumber}> — ${item.pullRequestTitle}`;
 	}
 
 	private headingFor(category: AttentionCategory): string {
 		switch (category) {
 			case AttentionCategory.NeedsReview:
-				return "Needs review";
+				return ":eyes: Needs review";
 			case AttentionCategory.WaitingOnResponse:
-				return "Waiting on response";
+				return ":hourglass_flowing_sand: Waiting on your response";
 			case AttentionCategory.FailedCi:
-				return "Failed CI";
+				return ":x: Checks failed";
 			case AttentionCategory.WaitingOnOthers:
-				return "Waiting on others";
+				return ":hourglass: Waiting on others";
 			case AttentionCategory.Mentioned:
-				return "Mentioned";
+				return ":thread: Mentioned";
 			case AttentionCategory.NewComments:
-				return "New comments";
+				return ":speech_balloon: New comments";
 			case AttentionCategory.StaleReviewRequest:
-				return "Stale review requests";
+				return ":zzz: Stale review requests";
 			case AttentionCategory.ClosedOrMerged:
-				return "Resolved";
+				return ":white_check_mark: Resolved";
 		}
+	}
+
+	private pluralize(noun: string, count: number): string {
+		return count === 1 ? noun : `${noun}s`;
 	}
 }

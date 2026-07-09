@@ -90,7 +90,7 @@ describe("SlackCommandsService", () => {
 		const response = await service.handle({ ...baseCommand, text: "inbox" });
 
 		expect(attention.listActiveByGithubUser).toHaveBeenCalledWith("octocat");
-		expect(response.text).toContain("Review requested");
+		expect(response.text).toContain("You were requested for review");
 	});
 
 	it("sends debug example messages to the invoking Slack user", async () => {

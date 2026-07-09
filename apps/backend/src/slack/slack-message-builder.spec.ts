@@ -9,12 +9,18 @@ describe("SlackMessageBuilder", () => {
 	const builder = new SlackMessageBuilder();
 
 	it.each([
-		[AttentionCategory.NeedsReview, "Review requested"],
-		[AttentionCategory.Mentioned, "Mentioned"],
-		[AttentionCategory.NewComments, "New comments"],
-		[AttentionCategory.FailedCi, "Checks failed"],
-		[AttentionCategory.StaleReviewRequest, "Still waiting on your review"],
-	])("formats concise text for %s", (category, expected) => {
+		[AttentionCategory.NeedsReview, ":eyes: You were requested for review"],
+		[AttentionCategory.Mentioned, ":thread: You were mentioned"],
+		[
+			AttentionCategory.NewComments,
+			":speech_balloon: New comments need your attention",
+		],
+		[AttentionCategory.FailedCi, ":x: Checks failed"],
+		[
+			AttentionCategory.StaleReviewRequest,
+			":zzz: Review request is getting stale",
+		],
+	])("formats polished card text for %s", (category, expected) => {
 		const message = builder.buildAttentionMessage({
 			id: "attention-1",
 			category,
@@ -28,13 +34,32 @@ describe("SlackMessageBuilder", () => {
 			},
 		});
 
-		expect(message.text).toBe(`${expected} — acme/payments-api PR #413`);
-		expect(JSON.stringify(message.blocks)).toContain("View PR");
+		expect(message.text).toBe(`${expected} — Improve payments`);
+		expect(JSON.stringify(message.blocks)).toContain("Improve payments");
+		expect(JSON.stringify(message.blocks)).toContain("acme/payments-api");
+		expect(JSON.stringify(message.blocks)).toContain("Mark handled");
+	});
+
+	it("uses category-specific primary actions", () => {
+		const message = builder.buildAttentionMessage({
+			id: "attention-1",
+			category: AttentionCategory.FailedCi,
+			assigneeLogin: "octo",
+			reason: "Checks failed",
+			pullRequest: {
+				number: 413,
+				title: "Improve payments",
+				htmlUrl: "https://github.example/pr/413",
+				repositoryFullName: "acme/payments-api",
+			},
+		});
+
+		expect(JSON.stringify(message.blocks)).toContain("Check CI");
 	});
 
 	it("formats an empty inbox", () => {
 		expect(builder.buildInboxText([])).toBe(
-			"Your Review Radar inbox is empty.",
+			"🎉 Nothing needs your attention right now.",
 		);
 	});
 
@@ -56,6 +81,12 @@ describe("SlackMessageBuilder", () => {
 					updatedAt: new Date(),
 				},
 			]),
-		).toContain("New comments — 2 new comments");
+		).toContain(
+			":speech_balloon: New comments need your attention — 2 new comments",
+		);
+	});
+
+	it("formats an empty home view with personality", () => {
+		expect(JSON.stringify(builder.buildHomeView([]))).toContain("You’re clear");
 	});
 });
